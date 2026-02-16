@@ -1,8 +1,10 @@
 const express = require('express');
 const Joi = require('joi'); //Joi is a class, so we should name it with Pascal convention
-const app = express(); 
+const dotenv = require('dotenv');
+const app = express();
 
 app.use(express.json()); //a middleware that enables express to handle json
+dotenv.config({path: '.env'}); 
 
 const courses = [
   {
@@ -51,7 +53,7 @@ const courses = [
     name: 'Cloud Computing and DevOps',
     credits: 5,
     department: 'Software Engineering',
-    level: 'Master'
+    level: 'Master'  
   },
   {
     id: 7,
@@ -90,7 +92,12 @@ app.post('/courses', (req,res) => {
     const newCourse = {id, code, name, credits, department,level}; 
 
     const schema = Joi.object({
-        name: Joi.string().min(3).required()
+        id: Joi.required(),
+        name: Joi.string().min(3).required(),
+        code: Joi.string().min(3).required(),
+        credits: Joi.number().required(),
+        department: Joi.string().required(),
+        level: Joi.string().required()
     }); 
 
     const result = schema.validate(newCourse); 
@@ -106,5 +113,23 @@ app.post('/courses', (req,res) => {
     })
 })
 
+app.delete('/courses/:id', (req,res)=> {
+  const id = Number(req.params.id); 
+  if (isNaN(id)){
+    return res.status(400).json({"message": "id provided must be a number"})
+  }
+  const indexToDelete = courses.findIndex((course) => course.id === id);
+  if (!indexToDelete) {
+    return res.status(404).json({'message': `Course with the provided id does not exist`}); 
+  }
+  courses.splice(indexToDelete,1); 
+  return res.status(200).json({'message': `Successfully delete course with id ${id}`})
+  
+})
+app.put('/courses', (req,res) => {
+  
+})
+
 const port = process.env.PORT || 3000; 
+console.log(port);
 app.listen(port, () => console.log(`Server is running on port ${port} `)); 
