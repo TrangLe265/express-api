@@ -2,10 +2,47 @@ const express = require('express');
 const Joi = require('joi'); //Joi is a class, so we should name it with Pascal convention
 const dotenv = require('dotenv');
 const app = express();
+const mongoose = require('mongoose'); //API to work with Mongo
 
 app.use(express.json()); //a middleware that enables express to handle json
 dotenv.config({path: '.env'}); 
 
+mongoose.connect('mongodb://localhost/video')
+  .then(() => console.log('Connected to MongoDB...'))
+  .catch(err => console.error('Couldnt connect to MongoDB')); 
+
+const courseSchema = new mongoose.Schema({
+    id: Number,
+    code: String,
+    name: String,
+    credits: Number,
+    department: String,
+    level: String
+})
+
+const Course = mongoose.model('Course', courseSchema); //class Course
+
+async function createCourse() {
+  const course = new Course({
+    id: 2,
+    code: 'CS201',
+    name: 'Data Structures and Algorithms',
+    credits: 5,
+    department: 'Computer Science',
+    level: 'Bachelor'
+}) //create new object name course from Course class
+
+const result = await course.save(); 
+}
+
+createCourse(); 
+
+async function  getCourses() {
+  const courses = await Course.find();
+  console.log(`Courses in the db: `,courses);
+}
+
+getCourses(); 
 const courses = [
   {
     id: 1,
