@@ -83,27 +83,25 @@ app.get('/courses', (req,res) => {
 
 app.get('/courses/:id', (req,res) => {
     const id = Number(req.params.id); 
-    const result = courses.filter((course) => course.id === id);
-    res.json(result);  
+    if (isNaN(id)){
+      return res.status(400).json({"message": "id provided must be a number"})
+    }
+
+    const result = courses.find((course) => course.id === id);
+    if (!result) 
+      return res.status(404).json({'message': `Course with the provided id doesnt not exist`}) 
+
+    return res.json(result);  
 })
 
 app.post('/courses', (req,res) => {
     const {id, code, name, credits, department,level} = req.body; //req.body is already an object 
     const newCourse = {id, code, name, credits, department,level}; 
 
-    const schema = Joi.object({
-        id: Joi.required(),
-        name: Joi.string().min(3).required(),
-        code: Joi.string().min(3).required(),
-        credits: Joi.number().required(),
-        department: Joi.string().required(),
-        level: Joi.string().required()
-    }); 
-
-    const result = schema.validate(newCourse); 
-    console.log(result); 
-    if (result.error){
-        res.json({'message':result.error.details[0].message})
+    const {error} = validateCourse(newCourse); 
+    console.log(error)
+    if (error){
+      return  res.status(400).send(error.details[0].message)
     }
 
     courses.push(newCourse);
@@ -126,9 +124,47 @@ app.delete('/courses/:id', (req,res)=> {
   return res.status(200).json({'message': `Successfully delete course with id ${id}`})
   
 })
-app.put('/courses', (req,res) => {
+
+app.put('/courses/:id', (req,res) => {
+  //look up the course to see if it exits
+  const id = Number(req.params.id); 
+  if (isNaN(id)){
+      return res.status(400).json({"message": "id provided must be a number"})
+    }
+
+  const courseIndex = courses.findIndex((course) => course.id === id); //findIndex method returns an index, while FIND method returns an object
+    if (courseIndex === -1) 
+      return res.status(404).json({'message': `Course with the provided id does not exist`}) 
   
+  //validate the PUT body
+  const {error} = validateCourse(req.body); //object destructer
+  if (error){
+    return res.status(400).send(error.details[0], schema); //result.error.details[0]: this is just how a Joi error object is laid out
+    
+  }
+
+  //perform the update
+  const {code, name, credits, department,level} = req.body;
+  courses[courseIndex] = {id, code, name, credits, department,level}; 
+
+  res.json(courses[courseIndex]); 
+
 })
+
+function validateCourse(course){
+  const schema = Joi.object({
+        id: Joi.required(),
+        name: Joi.string().min(3).required(),
+        code: Joi.string().min(3).required(),
+        credits: Joi.number().required(),
+        department: Joi.string().required(),
+        level: Joi.string().required()
+    }); 
+  
+  const result = schema.validate(course); 
+  console.log(result); 
+  return result; 
+}
 
 const port = process.env.PORT || 3000; 
 console.log(port);
