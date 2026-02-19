@@ -10,7 +10,7 @@ const genreSchema = new mongoose.Schema({
     }
 })
 
-const Genre = mongoose.model('Genre', genreSchema); //class Genre
+const Genre = mongoose.model('Genre', genreSchema); //create class/table Genre
 
 function validateGenre(genre){
   const schema = Joi.object({
@@ -21,7 +21,6 @@ function validateGenre(genre){
   
 }
 
-
 exports.genreSchema = genreSchema; 
 exports.Genre = Genre;
-exports.validate = validateGenre; 
+exports.validate = validateGenre;  

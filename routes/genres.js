@@ -12,6 +12,16 @@ router.get('/', async (req,res) => {
   
 }); 
 
+router.post('/', async(req,res) => {
+    const {error} = validate(req.body); 
+    if (error) return res.status(400).send(error.details[0].message);
+
+    let genre = new Genre({name: req.body.name}); 
+    genre = await genre.save(); 
+
+    res.send(genre); 
+}); 
+
 router.put('/:id',validateObjId ,async(req,res) => {
     const {error} = validate(req.body); 
     if (error) return res.status(400).send(error.details[0].message); 
@@ -25,16 +35,6 @@ router.put('/:id',validateObjId ,async(req,res) => {
     );
 
     if (!genre) return res.status(404).send(`No resource found with the provided id`);
-
-    res.send(genre); 
-}); 
-
-router.post('/', async(req,res) => {
-    const {error} = validate(req.body); 
-    if (error) return res.status(400).send(error.details[0].message);
-
-    let genre = new Genre({name: req.body.name}); 
-    genre = await genre.save(); 
 
     res.send(genre); 
 }); 
