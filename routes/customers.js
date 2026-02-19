@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/',async (req,res) => {
     const customers = await Customer.find()
-        .select("-___v")
+        .select("-__v")
         .sort("name");
 
     res.send(customers); 
@@ -63,7 +63,7 @@ router.delete('/:id', validateObjId, async(req, res) => {
 }); 
 
 router.get('/:id', validateObjId, async(req, res) => {
-    const customer = await Customer.findById(req.params.id).select("-___v");
+    const customer = await Customer.findById(req.params.id).select("-__v");
     
     if (!customer) return res.status(404).send(`No resource found with the provided id`); 
 
